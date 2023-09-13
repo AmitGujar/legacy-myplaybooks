@@ -1,0 +1,7 @@
+- name: Rebooting the machines
+  hosts: azure
+  become: true
+  tasks:
+    - name: Rebooting the machines
+      ansible.builtin.reboot:
+        msg: The machines will reboot

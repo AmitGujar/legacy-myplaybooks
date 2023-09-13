@@ -2,10 +2,19 @@
   hosts: azure
   become: true
   tasks:
-    - name: Installing screenfetch package
+    - name: Installing nginx
+      ansible.builtin.package:
+        name: nginx
+        state: present
+    - name: Uninstalling screenfetch
+      ansible.builtin.package:
+        name: screenfetch
+        state: absent
+    - name: Uninstalling btop
       ansible.builtin.package:
         name: btop
-        state: present
-    - name: Testing of something
-      ansible.builtin.shell: |
-        apt install hollywood
+        state: absent
+    - name: Uninstalling nginx
+      ansible.builtin.package:
+        name: nginx
+        state: absent
