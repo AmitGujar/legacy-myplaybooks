@@ -1,0 +1,11 @@
+- name: Installing packages
+  hosts: azure
+  become: true
+  tasks:
+    - name: Installing screenfetch package
+      ansible.builtin.package:
+        name: btop
+        state: present
+    - name: Testing of something
+      ansible.builtin.shell: |
+        apt install hollywood

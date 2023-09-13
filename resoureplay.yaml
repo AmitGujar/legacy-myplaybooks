@@ -1,0 +1,23 @@
+- name: Managing resource group
+  hosts: localhost
+  vars:
+    resource_name: AmitRG
+    location: centralindia
+  tasks:
+    - name: Creating a resource group
+      azure.azcollection.azure_rm_resourcegroup:
+        name: "{{ resource_name }}"
+        location: "{{ location }}"
+    - name: Creating virtual network
+      azure.azcollection.azure_rm_virtualnetwork:
+        name: vnet-ansiblemanaged
+        resource_group: "{{ resource_name }}"
+        location: "{{ location }}"
+        address_prefixes_cidr:
+          - "10.0.0.0/16"
+    - name: Deleting a resource group
+      azure.azcollection.azure_rm_resourcegroup:
+        name: "{{ resource_name }}"
+        location: "{{ location }}"
+        state: absent
+        force_delete_nonempty: true

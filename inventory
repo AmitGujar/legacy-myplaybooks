@@ -1,0 +1,7 @@
+[azure]
+4.224.38.149
+20.235.85.220
+
+[azure:vars]
+ansible_user=amitgujar 
+ansible_python_interpreter=/usr/bin/python3
