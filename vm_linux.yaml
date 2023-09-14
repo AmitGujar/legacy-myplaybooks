@@ -39,7 +39,7 @@
   # displaying generated ip address
     - name: Output public ip
       ansible.builtin.debug:
-        msg: "The public ip = {{ output_public_ip.state.ip_address }}"
+        msg: "The public ip = {{ output_public_ip.state.ip_address }} "
   # creating a network security group
     - name: Creating NSG
       azure.azcollection.azure_rm_securitygroup:
@@ -90,10 +90,15 @@
           publisher: Canonical
           sku: '22_04-lts'
           version: latest
-  # deleting a resource group
-    - name: Path of destruction 😈
-      azure.azcollection.azure_rm_resourcegroup:
-        name: "{{ resource_name }}"
-        location: "{{ location }}"
-        state: absent
-        force_delete_nonempty: true
+  # connection string
+    - name: Connect to machine using this string
+      ansible.builtin.debug:
+        msg: "ssh amitgujar@{{ output_public_ip.state.ip_address }}"
+
+  # # deleting a resource group
+  #   - name: Path of destruction 😈
+  #     azure.azcollection.azure_rm_resourcegroup:
+  #       name: "{{ resource_name }}"
+  #       location: "{{ location }}"
+  #       state: absent
+  #       force_delete_nonempty: true
