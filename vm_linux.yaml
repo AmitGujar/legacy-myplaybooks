@@ -1,0 +1,99 @@
+- name: Managing resource group
+  hosts: localhost
+  vars:
+    resource_name: TestRG
+    location: centralindia
+    virtual_network_name: vnet-ansiblemanaged
+    public_ip_name: pip_ansiblemanaged
+    nsg_name: nsg-ansiblemanaged
+    subnet_name: subnet-ansiblemanaged
+    nic_name: nic-ansiblemanaged
+  tasks:
+  # creating a resource group
+    - name: Creating a resource group
+      azure.azcollection.azure_rm_resourcegroup:
+        name: "{{ resource_name }}"
+        location: "{{ location }}"
+  # creating a virtual network
+    - name: Creating virtual network
+      azure.azcollection.azure_rm_virtualnetwork:
+        name: "{{ virtual_network_name }}"
+        resource_group: "{{ resource_name }}"
+        location: "{{ location }}"
+        address_prefixes_cidr:
+          - "10.0.0.0/16"
+  # creating a subnet
+    - name: Adding subnet
+      azure.azcollection.azure_rm_subnet:
+        name: "{{ subnet_name }}"
+        resource_group: "{{ resource_name }}"
+        virtual_network: "{{ virtual_network_name }}"
+        address_prefix_cidr: "10.0.1.0/24"
+  # creating a public ip
+    - name: Creating public ip
+      azure.azcollection.azure_rm_publicipaddress:
+        name: "{{ public_ip_name }}"
+        resource_group: "{{ resource_name }}"
+        allocation_method: Static
+      register: output_public_ip
+  # displaying generated ip address
+    - name: Output public ip
+      ansible.builtin.debug:
+        msg: "The public ip = {{ output_public_ip.state.ip_address }}"
+  # creating a network security group
+    - name: Creating NSG
+      azure.azcollection.azure_rm_securitygroup:
+        name: "{{ nsg_name }}"
+        resource_group: "{{ resource_name }}"
+        rules:
+          - name: 'Allow_SSH'
+            protocol: Tcp
+            destination_port_range: 22
+            access: Allow
+            priority: 100
+            direction: Inbound
+          - name: 'Allow_web_traffic'
+            protocol: Tcp
+            destination_port_range:
+              - 80
+              - 443
+            access: Allow
+            priority: 101
+            direction: Inbound
+  # creating a network interface
+    - name: Creating NIC with public ip
+      azure.azcollection.azure_rm_networkinterface:
+        name: "{{ nic_name }}"
+        resource_group: "{{ resource_name }}"
+        virtual_network: "{{ virtual_network_name }}"
+        subnet_name: "{{ subnet_name }}"
+        security_group: "{{ nsg_name }}"
+        ip_configurations:
+          - name: deafult
+            public_ip_address_name: "{{ public_ip_name }}"
+            primary: true
+  # creating virtual machines
+    - name: Finally creating a VM
+      azure.azcollection.azure_rm_virtualmachine:
+        name: vm-ansiblemanaged
+        resource_group: "{{ resource_name }}"
+        vm_size: Standard_B1s
+        admin_username: amitgujar
+        ssh_password_enabled: false
+        ssh_public_keys:
+          - path: /home/amitgujar/.ssh/authorized_keys
+            key_data: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+        network_interfaces:
+          - name: "{{ nic_name }}"
+        image:
+          offer: 0001-com-ubuntu-server-jammy
+          publisher: Canonical
+          sku: '22_04-lts'
+          version: latest
+  # deleting a resource group
+    - name: Path of destruction 😈
+      azure.azcollection.azure_rm_resourcegroup:
+        name: "{{ resource_name }}"
+        location: "{{ location }}"
+        state: absent
+        force_delete_nonempty: true

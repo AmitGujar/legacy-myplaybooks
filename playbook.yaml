@@ -18,3 +18,7 @@
       ansible.builtin.package:
         name: nginx
         state: absent
+    - name: Aptitude module
+      ansible.builtin.apt:
+        name: docker.io
+        state: absent
