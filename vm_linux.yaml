@@ -8,12 +8,14 @@
     nsg_name: nsg-ansiblemanaged
     subnet_name: subnet-ansiblemanaged
     nic_name: nic-ansiblemanaged
+
   tasks:
   # creating a resource group
     - name: Creating a resource group
       azure.azcollection.azure_rm_resourcegroup:
         name: "{{ resource_name }}"
         location: "{{ location }}"
+
   # creating a virtual network
     - name: Creating virtual network
       azure.azcollection.azure_rm_virtualnetwork:
@@ -36,10 +38,7 @@
         resource_group: "{{ resource_name }}"
         allocation_method: Static
       register: output_public_ip
-  # displaying generated ip address
-    - name: Output public ip
-      ansible.builtin.debug:
-        msg: "The public ip = {{ output_public_ip.state.ip_address }} "
+
   # creating a network security group
     - name: Creating NSG
       azure.azcollection.azure_rm_securitygroup:
@@ -60,6 +59,7 @@
             access: Allow
             priority: 101
             direction: Inbound
+
   # creating a network interface
     - name: Creating NIC with public ip
       azure.azcollection.azure_rm_networkinterface:
@@ -72,16 +72,17 @@
           - name: deafult
             public_ip_address_name: "{{ public_ip_name }}"
             primary: true
+
   # creating virtual machines
     - name: Finally creating a VM
       azure.azcollection.azure_rm_virtualmachine:
         name: vm-ansiblemanaged
         resource_group: "{{ resource_name }}"
         vm_size: Standard_B1s
-        admin_username: amitgujar
+        admin_username: amit
         ssh_password_enabled: false
         ssh_public_keys:
-          - path: /home/amitgujar/.ssh/authorized_keys
+          - path: /home/amit/.ssh/authorized_keys
             key_data: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
         network_interfaces:
           - name: "{{ nic_name }}"
@@ -90,15 +91,41 @@
           publisher: Canonical
           sku: '22_04-lts'
           version: latest
+
   # connection string
     - name: Connect to machine using this string
       ansible.builtin.debug:
-        msg: "ssh amitgujar@{{ output_public_ip.state.ip_address }}"
+        msg: "ssh amit@{{ output_public_ip.state.ip_address }}"
 
-  # # deleting a resource group
-  #   - name: Path of destruction 😈
-  #     azure.azcollection.azure_rm_resourcegroup:
-  #       name: "{{ resource_name }}"
-  #       location: "{{ location }}"
-  #       state: absent
-  #       force_delete_nonempty: true
+  # copy contents to host
+    - name: Appending ssh connection details to file
+      ansible.builtin.copy:
+        content: |
+          #!/bin/bash
+          echo "This file will be executed by Ansible on control node"
+        dest: /home/amit/myPlaybooks/script.sh
+        mode: '0777'
+
+    - name: Executing shell script on host
+    # this path should be matched to your host
+      ansible.builtin.script: /home/amit/myPlaybooks/script.sh
+
+  # write contents on host file
+    - name: Generating the inventory file
+      ansible.builtin.copy:
+        content: |
+          [azure]
+          {{ output_public_ip.state.ip_address }}
+          [azure:vars]
+          ansible_user=amit
+          ansible_python_interpreter=/usr/bin/python3
+        dest: /home/amit/myPlaybooks/ansible_inventory
+        mode: '0777'
+
+  # deleting a resource group
+    - name: Path of destruction 😈
+      azure.azcollection.azure_rm_resourcegroup:
+        name: "{{ resource_name }}"
+        location: "{{ location }}"
+        state: absent
+        force_delete_nonempty: true
