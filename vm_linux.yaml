@@ -1,7 +1,8 @@
 - name: Creating a VM in Azure
   hosts: localhost
-  vars:
-    - ~/myPlaybooks/vault/vars.yml
+  vars_files:
+    - vault/values.yml
+
   tasks:
   # creating a resource group
     - name: Creating a resource group
