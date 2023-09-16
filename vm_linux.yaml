@@ -9,6 +9,8 @@
       azure.azcollection.azure_rm_resourcegroup:
         name: "{{ resource_name }}"
         location: "{{ location }}"
+        tags:
+          Exp: "2"
 
   # creating a virtual network
     - name: Creating virtual network
