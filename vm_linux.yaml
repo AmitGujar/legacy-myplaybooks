@@ -1,14 +1,7 @@
-- name: Managing resource group
+- name: Creating a VM in Azure
   hosts: localhost
   vars:
-    resource_name: TestRG
-    location: centralindia
-    virtual_network_name: vnet-ansiblemanaged
-    public_ip_name: pip_ansiblemanaged
-    nsg_name: nsg-ansiblemanaged
-    subnet_name: subnet-ansiblemanaged
-    nic_name: nic-ansiblemanaged
-
+    - ~/myPlaybooks/vault/vars.yml
   tasks:
   # creating a resource group
     - name: Creating a resource group
