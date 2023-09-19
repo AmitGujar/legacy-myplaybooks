@@ -94,17 +94,13 @@
         msg: "ssh amit@{{ output_public_ip.state.ip_address }}"
 
   # copy contents to host
-    - name: Appending ssh connection details to file
-      ansible.builtin.copy:
-        content: |
-          #!/bin/bash
-          echo "This file will be executed by Ansible on control node"
-        dest: /home/amit/myPlaybooks/script.sh
-        mode: '0777'
-
-    - name: Executing shell script on host
-    # this path should be matched to your host
-      ansible.builtin.script: /home/amit/myPlaybooks/script.sh
+    # - name: Appending ssh connection details to file
+    #   ansible.builtin.copy:
+    #     content: |
+    #       #!/bin/bash
+    #       echo "This file will be executed by Ansible on control node"
+    #     dest: /home/amit/myPlaybooks/script.sh
+    #     mode: '0700'
 
   # write contents on host file
     - name: Generating the inventory file
@@ -116,7 +112,11 @@
           ansible_user=amit
           ansible_python_interpreter=/usr/bin/python3
         dest: /home/amit/myPlaybooks/ansible_inventory
-        mode: '0777'
+        mode: '0700'
+
+    - name: Executing shell script on host
+    # this path should be matched to your host
+      ansible.builtin.script: /home/amit/myPlaybooks/script.sh
 
   # deleting a resource group
     - name: Path of destruction 😈
