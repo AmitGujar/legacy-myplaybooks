@@ -1,6 +1,5 @@
 [azure]
-4.247.130.133
-4.240.8.210
+20.204.36.193
 
 [azure:vars]
 ansible_user=amitgujar 

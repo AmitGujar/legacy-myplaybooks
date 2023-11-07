@@ -102,6 +102,10 @@
     #     dest: /home/amit/myPlaybooks/script.sh
     #     mode: '0700'
 
+  # executing shell script on host
+    - name: Executing shell script on host
+    # this path should be matched to your host
+      ansible.builtin.script: /home/amit/myPlaybooks/script.sh
   # write contents on host file
     - name: Generating the inventory file
       ansible.builtin.copy:
@@ -113,11 +117,6 @@
           ansible_python_interpreter=/usr/bin/python3
         dest: /home/amit/myPlaybooks/ansible_inventory
         mode: '0700'
-
-    - name: Executing shell script on host
-    # this path should be matched to your host
-      ansible.builtin.script: /home/amit/myPlaybooks/script.sh
-
   # deleting a resource group
     - name: Path of destruction 😈
       azure.azcollection.azure_rm_resourcegroup:
